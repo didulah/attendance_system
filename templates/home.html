@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Home - Attendance System{% endblock %}
+
+{% block content %}
+
+<div class="eyebrow">Student lookup</div>
+<h1>Find a student</h1>
+<p class="subtitle">Enter a Student ID to view their attendance record.</p>
+
+<form method="POST" action="{{ url_for('home') }}">
+  <label for="stId">Student ID</label>
+  <input type="text" id="stId" name="stId" class="mono" placeholder="e.g. 249001" required autofocus>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-primary" style="flex:1">View student</button>
+  </div>
+</form>
+
+<p class="muted mt-24">Try one of the demo IDs: <span class="mono">249001</span>, <span class="mono">249002</span>, <span class="mono">249003</span></p>
+
+{% endblock %}
