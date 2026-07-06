@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ student['stName'] }} - Attendance System{% endblock %}
+{% block card_size %}wide{% endblock %}
+
+{% block content %}
+
+<div class="eyebrow">Student record</div>
+<h1>{{ student['stName'] }}</h1>
+<p class="subtitle">Student ID: <span class="mono">{{ student['stId'] }}</span></p>
+
+{% if latest %}
+  <label>Latest lecture</label>
+  <p>{{ latest['lecTitle'] }} &middot; {{ latest['lecDate'] }}</p>
+
+  <label>Status</label>
+  <p>
+    {% if latest['status'] == 'present' %}
+      <span class="badge present">present</span>
+      {% if latest['attendedTime'] %}
+        <span class="muted">at {{ latest['attendedTime'] }}</span>
+      {% endif %}
+    {% else %}
+      <span class="badge absent">absent</span>
+    {% endif %}
+  </p>
+{% else %}
+  <p class="muted">No attendance records yet for this student.</p>
+{% endif %}
+
+<div class="actions">
+  <a class="btn btn-primary" href="{{ url_for('stats', st_id=student['stId']) }}">View statistics</a>
+  <a class="btn btn-ghost" href="{{ url_for('update', st_id=student['stId']) }}">Update attendance</a>
+</div>
+<div class="actions">
+  <a class="btn btn-ghost" href="{{ url_for('report', st_id=student['stId']) }}" target="_blank">Print report</a>
+  <a class="btn btn-ghost" href="{{ url_for('home') }}">Back to search</a>
+</div>
+
+{% endblock %}
