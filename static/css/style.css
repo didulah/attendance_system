@@ -1,0 +1,207 @@
+/* ==========================================================
+   style.css
+   Shared styles for the Attendance System.
+   Theme: deep teal (security/scanner) + warm amber accent,
+   serif display type for a scholarly feel, mono for IDs.
+   ========================================================== */
+   
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #f5f6f4;
+  --surface: #ffffff;
+  --ink: #1b2430;
+  --ink-soft: #52606d;
+  --primary: #2f6f63;
+  --primary-dark: #234f46;
+  --accent: #c98a3e;
+  --danger: #b3452c;
+  --border: #dce0de;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+  font-weight: 600;
+  margin: 0 0 0.4em 0;
+  color: var(--ink);
+}
+
+code, .mono, input.mono {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+a {
+  color: var(--primary-dark);
+}
+/* ---------- Top navigation (shown on logged-in pages) ---------- */
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--primary-dark);
+  color: #fff;
+}
+.topnav .brand {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+.topnav a.logout {
+  color: #e8ece9;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border: 1px solid rgba(255,255,255,0.35);
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+.topnav a.logout:hover {
+  background: rgba(255,255,255,0.1);
+}
+/* ---------- Page shell ---------- */
+.page {
+  display: flex;
+  justify-content: center;
+  padding: 48px 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(27, 36, 48, 0.06);
+}
+
+.card.wide {
+  max-width: 640px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  margin-bottom: 24px;
+}
+/* ---------- Form elements ---------- */
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+label:first-of-type {
+  margin-top: 0;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--ink);
+}
+
+input:focus, select:focus, button:focus, a.logout:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+button, .btn {
+  appearance: none;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: #f0f1ef; }
+
+/* ---------- Flash messages ---------- */
+.flash {
+  background: #fbeadd;
+  border: 1px solid var(--accent);
+  color: #6b4620;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  margin-bottom: 18px;
+}
+/* ---------- Status badges ---------- */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.badge.present { background: #dcefe9; color: var(--primary-dark); }
+.badge.absent  { background: #f6e2db; color: var(--danger); }
+.badge.late    { background: #f7ecd8; color: #8a5a17; }
+
+/* ---------- Fingerprint ridge motif (signature element) ----------
+   Used once, on the login card, as a quiet nod to the biometric
+   theme of the project without resorting to a literal clipart icon. */
+.ridge-motif {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px auto;
+  opacity: 0.85;
+}
+/* ---------- Small helpers ---------- */
+.muted { color: var(--ink-soft); font-size: 0.85rem; }
+.center { text-align: center; }
+.mt-24 { margin-top: 24px; }
