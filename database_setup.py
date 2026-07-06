@@ -1,13 +1,20 @@
 """
+database_setup.py
+------------------
+This script creates the project.db (SQLite database) from scratch.
+Run with: python database_setup.py
+
+What this does:
 1. Deletes the old project.db if it exists (fresh start)
 2. Creates 4 tables: users, student, lecture, attendance
 3. Inserts sample/demo data (login credentials + demo students/lectures)
 """
+
 import sqlite3
 import os
 from werkzeug.security import generate_password_hash
 
-DB_NAME = "project.db"
+DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "project.db")
 
 # Fresh database requested -> remove old file if it exists
 if os.path.exists(DB_NAME):
@@ -16,6 +23,7 @@ if os.path.exists(DB_NAME):
 
 conn = sqlite3.connect(DB_NAME)
 cur = conn.cursor()
+
 # ---------------------------------------------------------
 # 1. users table - for server-side login validation
 # ---------------------------------------------------------
@@ -26,6 +34,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL
 )
 """)
+
 # ---------------------------------------------------------
 # 2. student table
 # ---------------------------------------------------------
@@ -35,6 +44,7 @@ CREATE TABLE student (
     stName VARCHAR(50) NOT NULL
 )
 """)
+
 # ---------------------------------------------------------
 # 3. lecture table
 # ---------------------------------------------------------
@@ -47,8 +57,11 @@ CREATE TABLE lecture (
     lecTitle VARCHAR(100)
 )
 """)
+
 # ---------------------------------------------------------
-# 4. attendance table
+# 4. attendance table (spelling fixed: attendence -> attendance)
+#    auto-increment id added so duplicate/multiple records
+#    can be tracked correctly
 # ---------------------------------------------------------
 cur.execute("""
 CREATE TABLE attendance (
@@ -61,7 +74,9 @@ CREATE TABLE attendance (
     FOREIGN KEY (lecId) REFERENCES lecture(lecId)
 )
 """)
+
 print("All 4 tables created successfully: users, student, lecture, attendance")
+
 # ---------------------------------------------------------
 # Sample Data - Login (admin/1234 - stored as a hash)
 # ---------------------------------------------------------
@@ -69,6 +84,7 @@ cur.execute(
     "INSERT INTO users (username, password_hash) VALUES (?, ?)",
     ("admin", generate_password_hash("1234"))
 )
+
 # ---------------------------------------------------------
 # Sample Data - Students
 # ---------------------------------------------------------
@@ -78,6 +94,7 @@ students = [
     (249003, "Tharindu Fernando"),
 ]
 cur.executemany("INSERT INTO student (stId, stName) VALUES (?, ?)", students)
+
 # ---------------------------------------------------------
 # Sample Data - Lectures
 # ---------------------------------------------------------
@@ -90,6 +107,7 @@ cur.executemany(
     "INSERT INTO lecture (lecDate, startTime, endTime, lecTitle) VALUES (?, ?, ?, ?)",
     lectures
 )
+
 # ---------------------------------------------------------
 # Sample Data - Attendance records
 # (lecId 1,2,3 = auto-generated in order of insertion above)
@@ -105,7 +123,9 @@ cur.executemany(
     "INSERT INTO attendance (stId, lecId, attendedTime, status) VALUES (?, ?, ?, ?)",
     attendance_records
 )
+
 conn.commit()
 conn.close()
+
 print(f"'{DB_NAME}' created successfully with sample data.")
 print("Login: username='admin', password='1234'")

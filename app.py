@@ -38,7 +38,7 @@ app = Flask(__name__)
 # environment variable settings instead of using a .env file.
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-this")
 
-DB_NAME = "project.db"
+DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "project.db")
 
 
 def get_db():
