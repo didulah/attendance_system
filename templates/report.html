@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Report - {{ student['stName'] }}{% endblock %}
+{% block card_size %}wide{% endblock %}
+
+{% block content %}
+
+<style>
+  @media print {
+    .topnav, .no-print { display: none !important; }
+    .page { padding: 0; }
+    .card { box-shadow: none; border: none; }
+  }
+  table.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+  table.report-table th, table.report-table td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+  table.report-table th {
+    background: #eef1ef;
+    font-family: "Source Serif 4", Georgia, serif;
+  }
+</style>
+
+<div class="eyebrow">Attendance report</div>
+<h1>{{ student['stName'] }}</h1>
+<p class="subtitle">Student ID: <span class="mono">{{ student['stId'] }}</span></p>
+
+<table class="report-table">
+  <tr>
+    <th>Date</th>
+    <th>Lecture</th>
+    <th>Attended time</th>
+    <th>Status</th>
+  </tr>
+  {% for row in records %}
+  <tr>
+    <td>{{ row['lecDate'] }}</td>
+    <td>{{ row['lecTitle'] }}</td>
+    <td>{{ row['attendedTime'] or '-' }}</td>
+    <td>
+      {% if row['status'] == 'present' %}
+        <span class="badge present">present</span>
+      {% else %}
+        <span class="badge absent">absent</span>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<div class="actions no-print">
+  <button type="button" class="btn btn-primary" onclick="window.print()">Print</button>
+  <a class="btn btn-ghost" href="{{ url_for('student_info', st_id=student['stId']) }}">Back to student</a>
+</div>
+
+{% endblock %}
