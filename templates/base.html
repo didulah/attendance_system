@@ -7,11 +7,14 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    
+
 {% if session.user %}
 <div class="topnav">
   <div class="brand">Attendance System</div>
-  <a class="logout" href="{{ url_for('logout') }}">Log out ({{ session.user }})</a>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <a href="{{ url_for('reports_select') }}" style="color:#e8ece9; text-decoration:none; font-size:0.9rem;">Reports</a>
+    <a class="logout" href="{{ url_for('logout') }}">Log out ({{ session.user }})</a>
+  </div>
 </div>
 {% endif %}
 
@@ -30,5 +33,6 @@
 
   </div>
 </div>
+
 </body>
 </html>

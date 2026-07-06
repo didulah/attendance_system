@@ -4,7 +4,7 @@
    Theme: deep teal (security/scanner) + warm amber accent,
    serif display type for a scholarly feel, mono for IDs.
    ========================================================== */
-   
+
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
@@ -48,6 +48,7 @@ code, .mono, input.mono {
 a {
   color: var(--primary-dark);
 }
+
 /* ---------- Top navigation (shown on logged-in pages) ---------- */
 .topnav {
   display: flex;
@@ -74,6 +75,7 @@ a {
 .topnav a.logout:hover {
   background: rgba(255,255,255,0.1);
 }
+
 /* ---------- Page shell ---------- */
 .page {
   display: flex;
@@ -109,6 +111,7 @@ a {
   font-size: 0.92rem;
   margin-bottom: 24px;
 }
+
 /* ---------- Form elements ---------- */
 label {
   display: block;
@@ -180,6 +183,7 @@ button, .btn {
   font-size: 0.88rem;
   margin-bottom: 18px;
 }
+
 /* ---------- Status badges ---------- */
 .badge {
   display: inline-block;
@@ -188,9 +192,10 @@ button, .btn {
   font-size: 0.82rem;
   font-weight: 600;
 }
-.badge.present { background: #dcefe9; color: var(--primary-dark); }
-.badge.absent  { background: #f6e2db; color: var(--danger); }
-.badge.late    { background: #f7ecd8; color: #8a5a17; }
+.badge.present    { background: #dcefe9; color: var(--primary-dark); }
+.badge.absent     { background: #f6e2db; color: var(--danger); }
+.badge.late       { background: #f7ecd8; color: #8a5a17; }
+.badge.unrecorded { background: #eceeec; color: var(--ink-soft); }
 
 /* ---------- Fingerprint ridge motif (signature element) ----------
    Used once, on the login card, as a quiet nod to the biometric
@@ -201,6 +206,7 @@ button, .btn {
   margin: 0 auto 18px auto;
   opacity: 0.85;
 }
+
 /* ---------- Small helpers ---------- */
 .muted { color: var(--ink-soft); font-size: 0.85rem; }
 .center { text-align: center; }
