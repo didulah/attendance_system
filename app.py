@@ -1,5 +1,8 @@
 """
+app.py
+------
 Flask backend for the Fingerprint Attendance System (mock/demo version).
+
 Routes:
   GET  /            -> redirect to /home if logged in, else show login page
   GET  /login       -> show login form
@@ -13,6 +16,7 @@ Routes:
   POST /update/<id> -> save attendance record (insert or update)
   GET  /report/<id> -> printable full attendance history
 """
+
 import os
 import sqlite3
 from functools import wraps
@@ -20,19 +24,28 @@ from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
+from dotenv import load_dotenv
+
+# Load variables from a local .env file (if one exists) into the environment.
+# This file is git-ignored, so secrets never get pushed to GitHub.
+load_dotenv()
 
 app = Flask(__name__)
 
 # Secret key is needed for session/cookies to work.
-# In production, set this via an environment variable instead of hardcoding it.
+# Always comes from an environment variable - never hardcode the real value here.
+# On PythonAnywhere (or any host), set SECRET_KEY in that platform's
+# environment variable settings instead of using a .env file.
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-this")
 
 DB_NAME = "project.db"
+
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 # ---------------------------------------------------------
 # Decorator: protects routes that require login
@@ -46,6 +59,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+
 # ---------------------------------------------------------
 # Root: send user to the right place
 # ---------------------------------------------------------
@@ -54,6 +68,7 @@ def index():
     if "user" in session:
         return redirect(url_for("home"))
     return redirect(url_for("login"))
+
 
 # ---------------------------------------------------------
 # Login
@@ -79,10 +94,12 @@ def login():
 
     return render_template("login.html")
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
 
 # ---------------------------------------------------------
 # Home: enter a Student ID to look up
@@ -97,6 +114,7 @@ def home():
             return redirect(url_for("home"))
         return redirect(url_for("student_info", st_id=st_id))
     return render_template("home.html")
+
 
 # ---------------------------------------------------------
 # Student info page
@@ -129,6 +147,7 @@ def student_info(st_id):
     conn.close()
 
     return render_template("student_info.html", student=student, latest=latest)
+
 
 # ---------------------------------------------------------
 # Statistics page (the old broken "More" page)
@@ -163,6 +182,7 @@ def stats(st_id):
         late_count=late_count,
     )
 
+
 def _is_late(time_str):
     """Demo rule: present after 08:00 counts as late."""
     if not time_str:
@@ -172,6 +192,7 @@ def _is_late(time_str):
     except ValueError:
         return False
     return hh > 8 or (hh == 8 and mm > 0)
+
 
 # ---------------------------------------------------------
 # Update / mark attendance page
@@ -229,30 +250,61 @@ def update(st_id):
 
     return render_template("update.html", student=student, lectures=lectures)
 
+
 # ---------------------------------------------------------
-# Printable report
+# Reports: choose a lecture, then see every student's
+# attendance status for that lecture.
 # ---------------------------------------------------------
-@app.route("/report/<int:st_id>")
+@app.route("/reports")
 @login_required
-def report(st_id):
+def reports_select():
     conn = get_db()
-    student = conn.execute(
-        "SELECT * FROM student WHERE stId = ?", (st_id,)
+    lectures = conn.execute(
+        "SELECT * FROM lecture ORDER BY lecDate DESC"
+    ).fetchall()
+    conn.close()
+    return render_template("reports_select.html", lectures=lectures)
+
+
+@app.route("/reports/go")
+@login_required
+def reports_go():
+    lec_id = request.args.get("lecId")
+    if not lec_id:
+        flash("Please choose a lecture.")
+        return redirect(url_for("reports_select"))
+    return redirect(url_for("reports_view", lec_id=lec_id))
+
+
+@app.route("/reports/<int:lec_id>")
+@login_required
+def reports_view(lec_id):
+    conn = get_db()
+    lecture = conn.execute(
+        "SELECT * FROM lecture WHERE lecId = ?", (lec_id,)
     ).fetchone()
 
-    records = conn.execute(
+    if lecture is None:
+        conn.close()
+        flash(f"No lecture found with ID {lec_id}.")
+        return redirect(url_for("reports_select"))
+
+    # LEFT JOIN so students with no attendance record for this lecture
+    # still appear in the report, with status = NULL ("not marked yet").
+    rows = conn.execute(
         """
-        SELECT a.*, l.lecDate, l.lecTitle
-        FROM attendance a
-        JOIN lecture l ON a.lecId = l.lecId
-        WHERE a.stId = ?
-        ORDER BY l.lecDate ASC
+        SELECT s.stId, s.stName, a.attendedTime, a.status
+        FROM student s
+        LEFT JOIN attendance a ON a.stId = s.stId AND a.lecId = ?
+        ORDER BY s.stName
         """,
-        (st_id,),
+        (lec_id,),
     ).fetchall()
     conn.close()
 
-    return render_template("report.html", student=student, records=records)
+    return render_template("reports_view.html", lecture=lecture, rows=rows)
+
+
 
 if __name__ == "__main__":
     # debug=True is fine for local development only.

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Report - {{ student['stName'] }}{% endblock %}
+{% block title %}Report - {{ lecture['lecTitle'] }}{% endblock %}
 {% block card_size %}wide{% endblock %}
 
 {% block content %}
@@ -27,27 +27,29 @@
   }
 </style>
 
-<div class="eyebrow">Attendance report</div>
-<h1>{{ student['stName'] }}</h1>
-<p class="subtitle">Student ID: <span class="mono">{{ student['stId'] }}</span></p>
+<div class="eyebrow">Lecture report</div>
+<h1>{{ lecture['lecTitle'] }}</h1>
+<p class="subtitle">{{ lecture['lecDate'] }} &middot; {{ lecture['startTime'] }} - {{ lecture['endTime'] }}</p>
 
 <table class="report-table">
   <tr>
-    <th>Date</th>
-    <th>Lecture</th>
+    <th>Student ID</th>
+    <th>Name</th>
     <th>Attended time</th>
     <th>Status</th>
   </tr>
-  {% for row in records %}
+  {% for row in rows %}
   <tr>
-    <td>{{ row['lecDate'] }}</td>
-    <td>{{ row['lecTitle'] }}</td>
+    <td class="mono">{{ row['stId'] }}</td>
+    <td>{{ row['stName'] }}</td>
     <td>{{ row['attendedTime'] or '-' }}</td>
     <td>
       {% if row['status'] == 'present' %}
         <span class="badge present">present</span>
-      {% else %}
+      {% elif row['status'] == 'absent' %}
         <span class="badge absent">absent</span>
+      {% else %}
+        <span class="badge unrecorded">not marked yet</span>
       {% endif %}
     </td>
   </tr>
@@ -56,7 +58,7 @@
 
 <div class="actions no-print">
   <button type="button" class="btn btn-primary" onclick="window.print()">Print</button>
-  <a class="btn btn-ghost" href="{{ url_for('student_info', st_id=student['stId']) }}">Back to student</a>
+  <a class="btn btn-ghost" href="{{ url_for('reports_select') }}">Choose another lecture</a>
 </div>
 
 {% endblock %}

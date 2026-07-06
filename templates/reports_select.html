@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Reports - Attendance System{% endblock %}
+
+{% block content %}
+
+<div class="eyebrow">Reports</div>
+<h1>Choose a lecture</h1>
+<p class="subtitle">See every student's attendance for a specific lecture.</p>
+
+<form method="GET" action="{{ url_for('reports_go') }}">
+  <label for="lecId">Lecture</label>
+  <select id="lecId" name="lecId" required>
+    <option value="" disabled selected>Choose a lecture...</option>
+    {% for lec in lectures %}
+      <option value="{{ lec['lecId'] }}">{{ lec['lecDate'] }} &middot; {{ lec['lecTitle'] }}</option>
+    {% endfor %}
+  </select>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-primary" style="flex:1">View report</button>
+  </div>
+</form>
+
+{% endblock %}
