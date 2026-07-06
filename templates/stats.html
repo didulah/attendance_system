@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Statistics - {{ student['stName'] }}{% endblock %}
+
+{% block content %}
+
+<div class="eyebrow">Attendance statistics</div>
+<h1>{{ student['stName'] }}</h1>
+<p class="subtitle">Student ID: <span class="mono">{{ student['stId'] }}</span></p>
+
+<label>Total sessions recorded</label>
+<p style="font-size:1.4rem; font-weight:600;">{{ total }}</p>
+
+<label>Present</label>
+<p><span class="badge present">{{ present_count }}</span></p>
+
+<label>Late arrivals</label>
+<p><span class="badge late">{{ late_count }}</span></p>
+
+<div class="actions">
+  <a class="btn btn-ghost" href="{{ url_for('student_info', st_id=student['stId']) }}">Back to student</a>
+</div>
+
+{% endblock %}
