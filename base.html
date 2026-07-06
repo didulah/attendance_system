@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Attendance System{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+{% if session.user %}
+<div class="topnav">
+  <div class="brand">Attendance System</div>
+  <a class="logout" href="{{ url_for('logout') }}">Log out ({{ session.user }})</a>
+</div>
+{% endif %}
+
+<div class="page">
+  <div class="card {% block card_size %}{% endblock %}">
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+  </div>
+</div>
+
+</body>
+</html>
