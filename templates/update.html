@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Update attendance - {{ student['stName'] }}{% endblock %}
+
+{% block content %}
+
+<div class="eyebrow">Mark attendance</div>
+<h1>{{ student['stName'] }}</h1>
+<p class="subtitle">Student ID: <span class="mono">{{ student['stId'] }}</span></p>
+
+<form method="POST" action="{{ url_for('update', st_id=student['stId']) }}">
+
+  <label for="lecId">Lecture</label>
+  <select id="lecId" name="lecId" required>
+    <option value="" disabled selected>Choose a lecture...</option>
+    {% for lec in lectures %}
+      <option value="{{ lec['lecId'] }}">{{ lec['lecDate'] }} &middot; {{ lec['lecTitle'] }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Attendance</label>
+  <div class="actions" style="margin-top:8px;">
+    <label style="margin:0; display:flex; align-items:center; gap:6px; font-size:0.95rem; color:var(--ink);">
+      <input type="radio" name="attendance" value="present" required style="width:auto;"> present
+    </label>
+    <label style="margin:0; display:flex; align-items:center; gap:6px; font-size:0.95rem; color:var(--ink);">
+      <input type="radio" name="attendance" value="absent" style="width:auto;"> absent
+    </label>
+  </div>
+
+  <label>Reason (if absent)</label>
+  <div class="actions" style="margin-top:8px; flex-wrap:wrap;">
+    <label style="margin:0; display:flex; align-items:center; gap:6px; font-size:0.95rem; color:var(--ink);">
+      <input type="radio" name="reason" value="medical" style="width:auto;"> medical
+    </label>
+    <label style="margin:0; display:flex; align-items:center; gap:6px; font-size:0.95rem; color:var(--ink);">
+      <input type="radio" name="reason" value="sports" style="width:auto;"> sports
+    </label>
+    <label style="margin:0; display:flex; align-items:center; gap:6px; font-size:0.95rem; color:var(--ink);">
+      <input type="radio" name="reason" value="other" style="width:auto;"> other
+    </label>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-primary" style="flex:1">Save</button>
+    <a class="btn btn-ghost" href="{{ url_for('student_info', st_id=student['stId']) }}">Cancel</a>
+  </div>
+</form>
+
+{% endblock %}
