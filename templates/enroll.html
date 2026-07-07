@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Fingerprint Enrollment</h2>
+<p class="muted">
+    Queue a job here, then ask the student to scan their finger at the
+    device when it prompts. The ESP32 checks for new jobs automatically.
+</p>
+
+<form method="POST" action="{{ url_for('enroll') }}">
+    <label for="stId">Student</label>
+    <select name="stId" id="stId" required>
+        <option value="" disabled selected>-- choose a student --</option>
+        {% for s in unenrolled %}
+        <option value="{{ s.stId }}">{{ s.stId }} - {{ s.stName }}</option>
+        {% endfor %}
+    </select>
+
+    <div class="controls">
+        <button type="submit">Queue enrollment</button>
+    </div>
+</form>
+
+{% if not unenrolled %}
+<p class="muted">All current students already have a fingerprint slot assigned.</p>
+{% endif %}
+
+<h3>Enrollment queue</h3>
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Job ID</th>
+        <th>Student</th>
+        <th>Slot</th>
+        <th>Status</th>
+        <th>Queued at</th>
+    </tr>
+    {% for job in jobs %}
+    <tr>
+        <td>{{ job.id }}</td>
+        <td>{{ job.stId }} - {{ job.stName }}</td>
+        <td>{{ job.fingerprint_id }}</td>
+        <td>
+            <span class="status-badge small
+                {% if job.status == 'done' %}present
+                {% elif job.status == 'failed' %}absent
+                {% else %}late{% endif %}">
+                {{ job.status }}
+            </span>
+        </td>
+        <td>{{ job.created_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
