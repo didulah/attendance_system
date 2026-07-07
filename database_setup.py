@@ -93,6 +93,7 @@ CREATE TABLE attendance (
 )
 """)
 
+<<<<<<< HEAD
 # ---------------------------------------------------------
 # 5. enroll_queue table - polling queue for ESP32 enrollment
 #    status: 'pending' -> 'done' or 'failed'
@@ -110,6 +111,9 @@ CREATE TABLE enroll_queue (
 """)
 
 print("All 5 tables created successfully: users, student, lecture, attendance, enroll_queue")
+=======
+print("All 4 tables created successfully: users, student, lecture, attendance")
+>>>>>>> main
 
 # ---------------------------------------------------------
 # Sample Data - Login (admin/1234 - stored as a hash)
@@ -128,7 +132,11 @@ students = [
     (249002, "Nadeesha Silva", None),
     (249003, "Tharindu Fernando", None),
 ]
+<<<<<<< HEAD
 cur.executemany("INSERT INTO student (stId, stName, fingerprint_id) VALUES (?, ?, ?)", students)
+=======
+cur.executemany("INSERT INTO student (stId, stName) VALUES (?, ?)", students)
+>>>>>>> main
 
 # ---------------------------------------------------------
 # Sample Data - Lectures
