@@ -6,8 +6,23 @@ Run with: python database_setup.py
 
 What this does:
 1. Deletes the old project.db if it exists (fresh start)
-2. Creates 4 tables: users, student, lecture, attendance
+2. Creates 5 tables: users, student, lecture, attendance, enroll_queue
 3. Inserts sample/demo data (login credentials + demo students/lectures)
+
+--- CHANGES FOR HARDWARE PHASE (R307S fingerprint sensor + ESP32) ---
+- student.fingerprint_id was added: this is NOT a template BLOB.
+  The R307S sensor stores the actual fingerprint template on its own
+  onboard flash and only ever returns a slot/ID number after a match.
+  So the database only needs to remember which slot number belongs
+  to which student -> a simple INTEGER column is enough.
+- enroll_queue table was added to support the ESP32 enrollment workflow.
+  The ESP32 cannot accept inbound connections (NAT/firewall), so it must
+  POLL the server instead. Flow:
+    1. Admin queues a job on the /enroll page (student + next free slot)
+    2. ESP32 calls GET /api/enroll/next periodically
+    3. If a pending job exists, ESP32 performs the R307S enrollment scan
+    4. ESP32 calls POST /api/enroll/confirm to report success/failure
+    5. Server updates student.fingerprint_id and marks the job done
 """
 
 import sqlite3
@@ -37,11 +52,14 @@ CREATE TABLE users (
 
 # ---------------------------------------------------------
 # 2. student table
+#    fingerprint_id: the R307S sensor's internal slot number
+#    (NULL until the student has been enrolled on the device)
 # ---------------------------------------------------------
 cur.execute("""
 CREATE TABLE student (
     stId INTEGER NOT NULL PRIMARY KEY,
-    stName VARCHAR(50) NOT NULL
+    stName VARCHAR(50) NOT NULL,
+    fingerprint_id INTEGER UNIQUE
 )
 """)
 
@@ -75,7 +93,23 @@ CREATE TABLE attendance (
 )
 """)
 
-print("All 4 tables created successfully: users, student, lecture, attendance")
+# ---------------------------------------------------------
+# 5. enroll_queue table - polling queue for ESP32 enrollment
+#    status: 'pending' -> 'done' or 'failed'
+# ---------------------------------------------------------
+cur.execute("""
+CREATE TABLE enroll_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stId INTEGER NOT NULL,
+    fingerprint_id INTEGER NOT NULL,
+    status VARCHAR(10) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    FOREIGN KEY (stId) REFERENCES student(stId)
+)
+""")
+
+print("All 5 tables created successfully: users, student, lecture, attendance, enroll_queue")
 
 # ---------------------------------------------------------
 # Sample Data - Login (admin/1234 - stored as a hash)
@@ -87,13 +121,14 @@ cur.execute(
 
 # ---------------------------------------------------------
 # Sample Data - Students
+# (fingerprint_id left NULL - not enrolled yet on real hardware)
 # ---------------------------------------------------------
 students = [
-    (249001, "Kasun Perera"),
-    (249002, "Nadeesha Silva"),
-    (249003, "Tharindu Fernando"),
+    (249001, "Kasun Perera", None),
+    (249002, "Nadeesha Silva", None),
+    (249003, "Tharindu Fernando", None),
 ]
-cur.executemany("INSERT INTO student (stId, stName) VALUES (?, ?)", students)
+cur.executemany("INSERT INTO student (stId, stName, fingerprint_id) VALUES (?, ?, ?)", students)
 
 # ---------------------------------------------------------
 # Sample Data - Lectures
