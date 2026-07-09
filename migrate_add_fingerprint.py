@@ -1,49 +1,75 @@
 """
 migrate_add_fingerprint.py
 ---------------------------
-Run this ONCE on the LIVE PythonAnywhere project.db to add fingerprint
-support WITHOUT deleting existing students/lectures/attendance records.
+Safe, non-destructive migration for the Fingerprint Attendance System.
 
-(database_setup.py deletes the whole db and rebuilds it - do NOT run
-that on the live server, or you will lose all real attendance data.)
+What this does:
+1. Connects to the EXISTING project.db (does NOT delete or recreate it)
+2. Checks the current columns of the 'student' table using PRAGMA table_info
+3. Adds a new column 'fingerprint_id INTEGER' ONLY if it does not already exist
+4. Safe to run multiple times - it will not duplicate the column or wipe data
 
-Usage:
+Why fingerprint_id is an INTEGER (not a BLOB):
+The R307S sensor stores the actual fingerprint template on the sensor module
+itself. When a scan matches, the sensor only returns a slot/ID number
+(an integer), never the raw template data. So the Flask database only
+ever needs to store that integer, not a binary template.
+
+Run with (PowerShell):
     python migrate_add_fingerprint.py
+
+Safe to run on:
+- Local project.db
+- Live PythonAnywhere project.db (via Bash console, after git pull)
+
+Do NOT use database_setup.py for this - that script deletes the whole
+database and recreates it from scratch, which would wipe all real
+attendance records on a live deployment.
 """
 
 import sqlite3
 import os
 
+# Use an absolute path anchored to this file's location.
+# Relative paths silently break under PythonAnywhere's WSGI process
+# (the working directory is not what you expect), which can make the
+# app look like it is talking to an empty database.
 DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "project.db")
 
-conn = sqlite3.connect(DB_NAME)
-cur = conn.cursor()
 
-# --- 1. Add fingerprint_id to student, only if it doesn't exist yet ---
-cur.execute("PRAGMA table_info(student)")
-existing_columns = [row[1] for row in cur.fetchall()]
+def column_exists(cursor, table_name, column_name):
+    """Return True if column_name already exists in table_name."""
+    cursor.execute("PRAGMA table_info(%s)" % table_name)
+    columns = [row[1] for row in cursor.fetchall()]
+    return column_name in columns
 
-if "fingerprint_id" not in existing_columns:
-    cur.execute("ALTER TABLE student ADD COLUMN fingerprint_id INTEGER")
-    print("Added column: student.fingerprint_id")
-else:
-    print("Column student.fingerprint_id already exists - skipped.")
 
-# --- 2. Create enroll_queue table, only if it doesn't exist yet ---
-cur.execute("""
-CREATE TABLE IF NOT EXISTS enroll_queue (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    stId INTEGER NOT NULL,
-    fingerprint_id INTEGER NOT NULL,
-    status VARCHAR(10) NOT NULL DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP,
-    FOREIGN KEY (stId) REFERENCES student(stId)
-)
-""")
-print("Ensured table enroll_queue exists.")
+def main():
+    if not os.path.exists(DB_NAME):
+        print("ERROR: project.db not found at: " + DB_NAME)
+        print("Make sure this script is in the same folder as project.db,")
+        print("or that project.db has already been created (see database_setup.py).")
+        return
 
-conn.commit()
-conn.close()
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
 
-print("Migration complete. Existing student/lecture/attendance data was not touched.")
+    if column_exists(cur, "student", "fingerprint_id"):
+        print("No changes needed: 'fingerprint_id' column already exists on 'student' table.")
+    else:
+        cur.execute("ALTER TABLE student ADD COLUMN fingerprint_id INTEGER")
+        conn.commit()
+        print("SUCCESS: 'fingerprint_id' column added to 'student' table.")
+
+    # Show the final schema so you can confirm the change
+    cur.execute("PRAGMA table_info(student)")
+    print("\nCurrent 'student' table schema:")
+    for row in cur.fetchall():
+        # row format: (cid, name, type, notnull, dflt_value, pk)
+        print("  - %s (%s)" % (row[1], row[2]))
+
+    conn.close()
+
+
+if __name__ == "__main__":
+    main()
