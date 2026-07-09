@@ -51,7 +51,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-this")
 # The ESP32 sends this in an "X-API-Key" header on every request.
 # Set DEVICE_API_KEY as an environment variable on PythonAnywhere
 # (same way SECRET_KEY is set) - never hardcode the real value.
-DEVICE_API_KEY = os.environ.get("DEVICE_API_KEY", "dev-device-key-change-this","your-esp32-shared-secret-here")
+DEVICE_API_KEY = os.environ.get("DEVICE_API_KEY", "your-esp32-shared-secret-here")
 
 DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "project.db")
 
